@@ -36,6 +36,7 @@ export function WorkspaceCreateFinding(props: CreateFindingProps) {
     const [findingDef, setFindingDef] = React.useState<string | undefined>(undefined); // selected definition
     const [defs, setDefs] = React.useState([] as Array<SimpleFindingDefinition>); // all definitions
     const [hover, setHover] = React.useState<SimpleFindingDefinition | undefined>(); // hovered definition
+    const [screenshot, setScreenshot] = React.useState<File>();
     const [file, setFile] = React.useState<File>();
     const [fileDataURL, setFileDataURL] = React.useState<string | undefined>("");
     const [description, setDescription] = React.useState<boolean>(true);
@@ -118,18 +119,37 @@ export function WorkspaceCreateFinding(props: CreateFindingProps) {
                 <div className="create-finding-container">
                     <form
                         className="create-finding-form"
-                        onSubmit={(e) => {
+                        onSubmit={async (e) => {
                             e.preventDefault();
                             if (findingDef === undefined) {
                                 return toast.error("Please select finding definition");
                             }
+
+                            let fileUuid = null;
+                            if (file !== undefined) {
+                                await Api.workspaces.files.upload(workspace, file).then(
+                                    handleApiError(({ uuid }) => {
+                                        fileUuid = uuid;
+                                    }),
+                                );
+                            }
+
+                            let screenshotUuid = null;
+                            if (screenshot !== undefined) {
+                                await Api.workspaces.files.uploadImage(workspace, screenshot).then(
+                                    handleApiError(({ uuid }) => {
+                                        fileUuid = uuid;
+                                    }),
+                                );
+                            }
+
                             Api.workspaces.findings
                                 .create(workspace, {
                                     severity: severity,
                                     definition: findingDef,
                                     details: sections.Description.value,
-                                    logFile: fileDataURL,
-                                    screenshot: screenshotDataURL,
+                                    logFile: fileUuid,
+                                    screenshot: screenshotUuid,
                                 })
                                 .then(
                                     handleApiError(async ({ uuid }) => {
@@ -248,6 +268,7 @@ export function WorkspaceCreateFinding(props: CreateFindingProps) {
                             <ScreenshotInput
                                 screenshotDataURL={screenshotDataURL}
                                 setScreenshotDataURL={setScreenshotDataURL}
+                                setScreenshot={setScreenshot}
                                 className="create-finding-screenshot-container"
                             />
                             <div className="create-finding-file-container">

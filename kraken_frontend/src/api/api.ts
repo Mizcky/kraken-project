@@ -54,6 +54,7 @@ import {
     WorkspaceInvitationsApi,
     WorkspaceTagsApi,
     WorkspacesApi,
+    FilesApi,
 } from "./generated";
 
 /** Database id i.e. and u32 */
@@ -87,6 +88,7 @@ const apiKeys = new ApiKeysApi(configuration);
 const wordlists = new WordlistApi(configuration);
 const wordlistsManagement = new WordlistManagementApi(configuration);
 const knowledgeBase = new KnowledgeBaseApi(configuration);
+const files = new FilesApi(configuration);
 
 export const Api = {
     admin: {
@@ -339,7 +341,25 @@ export const Api = {
                     workspaceTags.updateWorkspaceTag({ wUuid: workspaceUuid, tUuid: tagUuid, updateWorkspaceTag }),
                 ),
             delete: (workspaceUuid: UUID, tagUuid: UUID) =>
-                workspaceTags.deleteWorkspaceTag({ wUuid: workspaceUuid, tUuid: tagUuid }),
+                handleError(workspaceTags.deleteWorkspaceTag({ wUuid: workspaceUuid, tUuid: tagUuid })),
+        },
+        files: {
+            upload: (workspaceUuid: UUID, file: File) =>
+                handleError(
+                    files.uploadFile({
+                        uuid: workspaceUuid,
+                        filename: file.name,
+                        body: file,
+                    }),
+                ),
+            uploadImage: (workspaceUuid: UUID, file: File) =>
+                handleError(
+                    files.uploadImage({
+                        uuid: workspaceUuid,
+                        filename: file.name,
+                        body: file,
+                    }),
+                ),
         },
     },
     oauth: {

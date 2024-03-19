@@ -6,10 +6,11 @@ import CloseIcon from "../../../svg/close";
 export type ScreenshotInputProps = {
     screenshotDataURL: string | undefined;
     setScreenshotDataURL: React.Dispatch<React.SetStateAction<string | undefined>>;
+    setScreenshot: React.Dispatch<React.SetStateAction<File | undefined>>;
 } & React.HTMLProps<HTMLDivElement>;
 
 export const ScreenshotInput = forwardRef<HTMLDivElement, ScreenshotInputProps>(
-    ({ screenshotDataURL, setScreenshotDataURL, ...props }, ref) => {
+    ({ screenshotDataURL, setScreenshotDataURL, setScreenshot, ...props }, ref) => {
         const [drag, setDrag] = React.useState<boolean>(false);
         const [popup, setPopup] = React.useState<boolean>(false);
 
@@ -47,6 +48,7 @@ export const ScreenshotInput = forwardRef<HTMLDivElement, ScreenshotInputProps>(
                 const result = e.target?.result as string;
                 if (result) {
                     setScreenshotDataURL(result);
+                    setScreenshot(image);
                 }
             };
             setDrag(false);
